@@ -10,4 +10,38 @@ namespace AppBundle\Repository;
  */
 class BookRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function getBooksWithFilter($bookFilter)
+    {
+        $query = $this->createQueryBuilder('book')
+            ->innerJoin(
+                'book.authors',
+                'authors'
+            );
+        if ($bookFilter->title !== null && $bookFilter->title !== ''){
+            $query->andWhere('book.title LIKE :title')
+                ->setParameter('title', '%'.$bookFilter->title.'%');
+        }
+        if ($bookFilter->description !== null && $bookFilter->description !== ''){
+            $query->andWhere('book.description LIKE :description')
+                ->setParameter('description', '%'.$bookFilter->description.'%');
+        }
+        if ($bookFilter->dateFrom !== null && $bookFilter->dateFrom !== ''){
+            $query->andWhere('book.publicationDate >= :publicationDateFrom')
+                ->setParameter('publicationDateFrom', $bookFilter->dateFrom);
+        }
+        if ($bookFilter->dateTo !== null && $bookFilter->dateTo !== '') {
+            $query->andWhere('book.publicationDate <= :publicationDateTo')
+                ->setParameter('publicationDateTo', $bookFilter->dateTo);
+        }
+        if ($bookFilter->authors !== null && $bookFilter->authors !== '' && count($bookFilter->authors) !== 0) {
+            foreach ($bookFilter->authors as $author) {
+                $query->andWhere('authors IN (:authors)')
+                    ->setParameter('authors', $bookFilter->authors);
+            }
+            $query->addGroupBy('book.id');
+            $query->having('COUNT(authors) = :count')
+                ->setParameter('count', count($bookFilter->authors));
+        }
+        return $query->getQuery();
+    }
 }

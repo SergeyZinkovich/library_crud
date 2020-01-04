@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Book;
+use AppBundle\Entity\BookFilter;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;use Symfony\Component\HttpFoundation\Request;
@@ -17,16 +18,21 @@ class BookController extends Controller
     /**
      * Lists all book entities.
      *
-     * @Route("/", name="books_index", methods={"GET"})
+     * @Route("/", name="books_index", methods={"GET", "POST"})
      */
-    public function indexAction()
+    public function indexAction(Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
+        $bookFilter = new BookFilter();
+        $filterForm = $this->createForm('AppBundle\Form\BookFilterType', $bookFilter);
+        $filterForm->handleRequest($request);
 
-        $books = $em->getRepository('AppBundle:Book')->findAll();
+        $em = $this->getDoctrine()->getManager();
+        $query = $em->getRepository('AppBundle:Book')->getBooksWithFilter($bookFilter);
+        $books = $query->getResult();
 
         return $this->render('book/index.html.twig', array(
             'books' => $books,
+            'form' => $filterForm->createView(),
         ));
     }
 
