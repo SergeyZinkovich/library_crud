@@ -2,6 +2,8 @@
 
 namespace AppBundle\Repository;
 
+use Doctrine\ORM\Query\ResultSetMapping;
+
 /**
  * BookRepository
  *
@@ -43,5 +45,28 @@ class BookRepository extends \Doctrine\ORM\EntityRepository
                 ->setParameter('count', count($bookFilter->authors));
         }
         return $query->getQuery();
+    }
+
+    public function getBooksWithTwoAuthorsNative()
+    {
+        $sql = 'Select T.book_id, title, description, publicationDate, name, author_id from
+         (SELECT book_id, count(*) c
+         FROM symfony.book_author
+         INNER JOIN symfony.author on author_id = id
+         group by book_id) as T
+         INNER JOIN symfony.book_author ba on ba.book_id = T.book_id
+         INNER JOIN symfony.book b on T.book_id = b.id
+         INNER JOIN author authors on author_id = authors.id
+         where c = 2';
+        $rsm = new ResultSetMapping();
+        $rsm->addEntityResult('AppBundle:Book', 'book');
+        $rsm->addFieldResult('book', 'book_id', 'id');
+        $rsm->addFieldResult('book', 'title', 'title');
+        $rsm->addFieldResult('book', 'description', 'description');
+        $rsm->addFieldResult('book', 'publicationDate', 'publicationDate');
+        $rsm->addJoinedEntityResult('AppBundle:Author', 'author', 'book', 'authors');
+        $rsm->addMetaResult('author', 'author_id', 'id', true);
+        $rsm->addMetaResult('author', 'name', 'name', true);
+        return $this->_em->createNativeQuery($sql, $rsm);
     }
 }
