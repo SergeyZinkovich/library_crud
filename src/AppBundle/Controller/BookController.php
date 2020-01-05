@@ -4,6 +4,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Book;
 use AppBundle\Entity\BookFilter;
+use AppBundle\Service\ImageUploader;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;use Symfony\Component\HttpFoundation\Request;
@@ -41,13 +42,14 @@ class BookController extends Controller
      *
      * @Route("/new", name="books_new", methods={"GET", "POST"})
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request, ImageUploader $imageUploader)
     {
         $book = new Book();
-        $form = $this->createForm('AppBundle\Form\BookType', $book);
+        $form = $this->createForm('AppBundle\Form\BookType', $book, ['image_required' => True]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $book->setImage($imageUploader->upload($book->getImage()));
             $em = $this->getDoctrine()->getManager();
             $em->persist($book);
             $em->flush();
@@ -81,13 +83,20 @@ class BookController extends Controller
      *
      * @Route("/{id}/edit", name="books_edit", methods={"GET", "POST"})
      */
-    public function editAction(Request $request, Book $book)
+    public function editAction(Request $request, Book $book, ImageUploader $imageUploader)
     {
+        $imagePath = $book->getImage();
         $deleteForm = $this->createDeleteForm($book);
-        $editForm = $this->createForm('AppBundle\Form\BookType', $book);
+        $editForm = $this->createForm('AppBundle\Form\BookType', $book, ['image_required' => False]);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
+            if ($book->getImage() !== $imagePath && $book->getImage() !== null) {
+                $book->setImage($imageUploader->upload($book->getImage()));
+            }
+            else{
+                $book->setImage($imagePath);
+            }
             $this->getDoctrine()->getManager()->flush();
 
             return $this->redirectToRoute('books_edit', array('id' => $book->getId()));

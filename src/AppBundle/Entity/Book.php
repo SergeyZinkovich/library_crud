@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Book
@@ -47,6 +48,13 @@ class Book
      * @ORM\JoinColumn(name="books_authors", referencedColumnName="id")
      */
     private $authors;
+
+    /**
+     * @ORM\Column(type="string")
+     *
+     * @Assert\Image()
+     */
+    private $image;
 
 
     /**
@@ -153,6 +161,26 @@ class Book
     public function getAuthors()
     {
         return $this->authors;
+    }
+
+    /**
+     * @return string
+     */
+    public function getImage()
+    {
+        return $this->image;
+    }
+
+    /**
+     * @param string $image
+     *
+     * @return Book
+     */
+    public function setImage($image)
+    {
+        $this->image = $image;
+
+        return $this;
     }
 }
 

@@ -16,6 +16,7 @@
                 <th>Description</th>
                 <th>Publication date</th>
                 <th>Authors</th>
+                <th>Image</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -31,6 +32,7 @@
                         {{ author.name }}<br>
                     {% endfor %}
                 </td>
+                <td><img src="{{asset('uploads/images/' ~ book.image) }}" style="height: 100px; width: 100px"></td>
                 <td>
                     <ul>
                         <li>
