@@ -51,13 +51,13 @@ class BookRepository extends \Doctrine\ORM\EntityRepository
 
     public function getBooksWithTwoAuthorsNative()
     {
-        $sql = 'Select T.book_id, title, description, publicationDate, name, author_id from
+        $sql = 'Select T.book_id, title, description, publicationDate, image, name, author_id from
          (SELECT book_id, count(*) c
-         FROM symfony.book_author
-         INNER JOIN symfony.author on author_id = id
+         FROM book_author
+         INNER JOIN author on author_id = id
          group by book_id) as T
-         INNER JOIN symfony.book_author ba on ba.book_id = T.book_id
-         INNER JOIN symfony.book b on T.book_id = b.id
+         INNER JOIN book_author ba on ba.book_id = T.book_id
+         INNER JOIN book b on T.book_id = b.id
          INNER JOIN author authors on author_id = authors.id
          where c = 2';
         $rsm = new ResultSetMapping();
@@ -66,6 +66,7 @@ class BookRepository extends \Doctrine\ORM\EntityRepository
         ->addFieldResult('book', 'title', 'title')
         ->addFieldResult('book', 'description', 'description')
         ->addFieldResult('book', 'publicationDate', 'publicationDate')
+        ->addFieldResult('book', 'image', 'image')
         ->addJoinedEntityResult('AppBundle:Author', 'author', 'book', 'authors')
         ->addMetaResult('author', 'author_id', 'id', true)
         ->addMetaResult('author', 'name', 'name', true);
