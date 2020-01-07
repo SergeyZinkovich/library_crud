@@ -2,6 +2,7 @@
 
 namespace AppBundle\Form;
 
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -20,7 +21,11 @@ class BookType extends AbstractType
             ->add('publicationDate',DateType::class, [
                 'widget' => 'single_text',
             ])
-            ->add('authors')
+            ->add('authors', EntityType::class, [
+                'class' => 'AppBundle:Author',
+                'multiple' => true,
+                'required' => true,
+            ])
             ->add('image', FileType::class, [
                 'label' => $options['image_required'] ? 'Image' : 'New Image',
                 'data_class' => null,

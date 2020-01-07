@@ -1,48 +1,106 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    {{ form_start(form) }}
-    {{ form_widget(form) }}
+    {{ form_start(filter_form) }}
+    {{ form_widget(filter_form) }}
     <input type="submit" value="Search" />
-    {{ form_end(form) }}
-
+    {{ form_end(filter_form) }}
     <h1>Books list</h1>
-
     <table>
         <thead>
-            <tr>
-                <th>Id</th>
-                <th>Title</th>
-                <th>Description</th>
-                <th>Publication date</th>
-                <th>Authors</th>
-                <th>Image</th>
-                <th>Actions</th>
-            </tr>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+        <script type="text/javascript">
+            function change_field(id) {
+                var elements = $("[name^='book" + id +"']");
+                elements.each(function(e, element) {
+                    if (typeof $(this).attr('hidden') === "undefined"){
+                        $(this).attr('hidden', 'hidden');
+                    }else {
+                        $(this).removeAttr('hidden');
+                    }
+                });
+            }
+            $(function() {
+                $("form[name^='book'][name!='book_filter']").submit(function(e) {
+                    e.preventDefault();
+                    var form = $(this);
+                    $.ajax({
+                        type: 'POST',
+                        url: form.attr('action'),
+                        data: new FormData($(this)[0]),
+                        processData: false, contentType: false, cache: false,
+                        success: function(response) {
+                            console.log("Successfully updated");
+                            var book = JSON.parse(response);
+                            var id = form.attr('book_id');
+                            $("img[name='book" + id +"_img']").attr('src', "/uploads/images/" + book.image);
+                            $("div[name='book" + id +"_title_div']").text(book.title);
+                            $("div[name='book" + id +"_description_div']").text(book.description);
+                            $("div[name='book" + id +"_publicationDate_div']").text(book.publicationDate);
+                            var authors_text = "";
+                            for (var i = 0; i < book.authors.length; i++) {
+                                authors_text += book.authors[i] + "<br>";
+                            }
+                            $("div[name='book" + id +"_authors_div']").html(authors_text);
+                            change_field(id);
+                        },
+                        error: function (){
+                            console.log("Updating failed");
+                        }
+                    });
+                });
+            });
+        </script>
+        <tr>
+            <th>Id</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Publicationdate</th>
+            <th>Authors</th>
+            <th>Image</th>
+            <th>Actions</th>
+        </tr>
         </thead>
         <tbody>
-        {% for book in books %}
+        {% for form in edit_forms %}
             <tr>
-                <td><a href="{{ path('books_show', { 'id': book.id }) }}">{{ book.id }}</a></td>
-                <td>{{ book.title }}</td>
-                <td>{{ book.description }}</td>
-                <td>{% if book.publicationDate %}{{ book.publicationDate|date('Y-m-d') }}{% endif %}</td>
+                {{ form_start(form, {'attr': {'book_id': form.vars.value.id}}) }}
+                <td><a href="{{ path('books_show', { 'id': form.vars.value.id }) }}">{{ form.vars.value.id }}</a></td>
                 <td>
-                    {% for author in book.authors %}
-                        {{ author.name }}<br>
-                    {% endfor %}
+                    <div name = 'book{{ form.vars.value.id }}_title_div' >{{ form.vars.value.title }}</div>
+                    {{ form_widget(form.title, {'attr': {'book_id': form.vars.value.id, 'hidden': 'true'}}) }}
                 </td>
-                <td><img src="{{asset('uploads/images/' ~ book.image) }}" style="height: 100px; width: 100px"></td>
                 <td>
-                    <ul>
-                        <li>
-                            <a href="{{ path('books_show', { 'id': book.id }) }}">show</a>
-                        </li>
-                        <li>
-                            <a href="{{ path('books_edit', { 'id': book.id }) }}">edit</a>
-                        </li>
-                    </ul>
+                    <div name = 'book{{ form.vars.value.id }}_description_div'>{{ form.vars.value.description }}</div>
+                    {{ form_widget(form.description, {'attr': {'book_id': form.vars.value.id, 'hidden': 'true'}}) }}
                 </td>
+                <td>
+                    <div name = 'book{{ form.vars.value.id }}_publicationDate_div'>
+                        {% if form.vars.value.publicationDate %}
+                            {{ form.vars.value.publicationDate|date('Y-m-d') }}
+                        {% endif %}
+                    </div>
+                    {{ form_widget(form.publicationDate, {'attr': {'book_id': form.vars.value.id, 'hidden': 'true'}}) }}
+                </td>
+                <td>
+                    <div name = 'book{{ form.vars.value.id }}_authors_div'>
+                        {% for author in form.vars.value.authors %}
+                            {{ author.name }}<br>
+                        {% endfor %}
+                    </div>
+                    {{ form_widget(form.authors, {'attr': {'book_id': form.vars.value.id, 'hidden': 'true'}}) }}
+                </td>
+                <td>
+                    <img name = 'book{{ form.vars.value.id }}_img' src="{{asset('uploads/images/' ~ form.vars.value.image) }}" style="height: 100px; width: 100px">
+                    {{ form_widget(form.image, {'attr': {'book_id': form.vars.value.id, 'hidden': 'true'}}) }}
+                </td>
+                <td>
+                    <a href="{{ path('books_show', { 'id': form.vars.value.id }) }}">show</a>
+                    <br>
+                    <button name = 'book{{ form.vars.value.id }}_edit_btn' type="button" onclick="change_field('{{ form.vars.value.id }}');">Edit</button>
+                    <input name = 'book{{ form.vars.value.id }}_submit_btn' hidden='hidden' type="submit" value="Submit"/>
+                </td>
+                {{ form_end(form) }}
             </tr>
         {% endfor %}
         </tbody>

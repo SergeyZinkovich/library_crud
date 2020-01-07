@@ -6,6 +6,7 @@ use AppBundle\Entity\Book;
 use AppBundle\Entity\BookFilter;
 use AppBundle\Service\ImageUploader;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -31,9 +32,15 @@ class BookController extends Controller
         $query = $em->getRepository('AppBundle:Book')->getBooksWithFilter($bookFilter);
         $books = $query->getResult();
 
+        $editFormViews = [];
+        foreach ($books as $book){
+            $editFormViews[] = $this->createEditForm($book)->createView();
+        }
+
         return $this->render('book/index.html.twig', array(
             'books' => $books,
-            'form' => $filterForm->createView(),
+            'filter_form' => $filterForm->createView(),
+            'edit_forms' => $editFormViews,
         ));
     }
 
@@ -87,7 +94,7 @@ class BookController extends Controller
     {
         $imagePath = $book->getImage();
         $deleteForm = $this->createDeleteForm($book);
-        $editForm = $this->createForm('AppBundle\Form\BookType', $book, ['image_required' => False]);
+        $editForm = $this->createEditForm($book);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
@@ -99,7 +106,20 @@ class BookController extends Controller
             }
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute('books_edit', array('id' => $book->getId()));
+            if ($request->isXmlHttpRequest()) {
+                $authors = [];
+                foreach ($book->getAuthors() as $author){
+                    $authors[] = $author->getName();
+                }
+                $arr = ['title' => $book->getTitle(),
+                    'description' => $book->getDescription(),
+                    'publicationDate' => $book->getPublicationDate()->format('Y-m-d'),
+                    'authors' => $authors,
+                    'image' => $book->getImage()];
+                return new Response(json_encode($arr), 200);
+            }
+
+            return $this->redirectToRoute('books_show', array('id' => $book->getId()));
         }
 
         return $this->render('book/edit.html.twig', array(
@@ -142,5 +162,18 @@ class BookController extends Controller
             ->setMethod('DELETE')
             ->getForm()
         ;
+    }
+
+    /**
+     * @param Book $book The book entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createEditForm(Book $book)
+    {
+        return $this->get('form.factory')
+            ->createNamedBuilder('book' . $book->getId(), 'AppBundle\Form\BookType', $book, ['image_required' => False])
+            ->setAction($this->generateUrl('books_edit', array('id' => $book->getId())))
+            ->getForm();
     }
 }
