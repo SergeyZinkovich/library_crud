@@ -45,6 +45,7 @@ class BookRepository extends \Doctrine\ORM\EntityRepository
             $query->having('COUNT(authors) = :count')
                 ->setParameter('count', count($bookFilter->authors));
         }
+        $query->orderBy('book.id');
         return $query->getQuery();
     }
 
