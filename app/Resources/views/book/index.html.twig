@@ -1,6 +1,8 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
+    <button type="button" onClick='location.href="/authors/"'>Authors</button>
+    <button type="button" onClick='location.href="/books/"'>Books</button>
     {{ form_start(filter_form) }}
     {{ form_widget(filter_form) }}
     <input type="submit" value="Search" />
@@ -95,7 +97,7 @@
                     {{ form_widget(form.image, {'attr': {'book_id': form.vars.value.id, 'hidden': 'true'}}) }}
                 </td>
                 <td>
-                    <a href="{{ path('books_show', { 'id': form.vars.value.id }) }}">show</a>
+                    <button type="button" onClick='location.href="{{ path('books_show', { 'id': form.vars.value.id }) }}"'>Show</button>
                     <br>
                     <button name = 'book{{ form.vars.value.id }}_edit_btn' type="button" onclick="change_field('{{ form.vars.value.id }}');">Edit</button>
                     <input name = 'book{{ form.vars.value.id }}_submit_btn' hidden='hidden' type="submit" value="Submit"/>
