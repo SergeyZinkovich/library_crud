@@ -113,7 +113,7 @@ class BookController extends Controller
                 }
                 $arr = ['title' => $book->getTitle(),
                     'description' => $book->getDescription(),
-                    'publicationDate' => $book->getPublicationDate()->format('Y-m-d'),
+                    'publicationDate' => $book->getPublicationDate()->format('d-m-Y'),
                     'authors' => $authors,
                     'image' => $book->getImage()];
                 return new Response(json_encode($arr), 200);

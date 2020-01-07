@@ -77,7 +77,7 @@
                 <td>
                     <div name = 'book{{ form.vars.value.id }}_publicationDate_div'>
                         {% if form.vars.value.publicationDate %}
-                            {{ form.vars.value.publicationDate|date('Y-m-d') }}
+                            {{ form.vars.value.publicationDate|date('d-m-Y') }}
                         {% endif %}
                     </div>
                     {{ form_widget(form.publicationDate, {'attr': {'book_id': form.vars.value.id, 'hidden': 'true'}}) }}
