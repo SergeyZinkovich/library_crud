@@ -15,29 +15,29 @@ class BookFilterType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('title', TextType::class, array('required' => false, 'label' => 'title '))
-            ->add('description', TextType::class, array('required' => false, 'label' => 'description '))
+        $builder->add('title', TextType::class, array('required' => false, 'label' => 'Title '))
+            ->add('description', TextType::class, array('required' => false, 'label' => 'Description '))
             ->add('authors', EntityType::class, array(
-                'label' => 'authors',
+                'label' => 'Authors ',
                 'multiple' => true,
                 'required' => false,
                 'class' => 'AppBundle:Author'))
             ->add('dateFrom', DateType::class, array(
-                'label' => 'date from',
+                'label' => 'Date from ',
                 'widget' => 'single_text',
                 'input'  => 'datetime',
                 'format' => 'yyyy-MM-dd',
                 'attr' => array('class' => 'date'),
                 'required' => false))
             ->add('dateTo', DateType::class, array(
-                'label' => 'date to',
+                'label' => 'Date to ',
                 'widget' => 'single_text',
                 'input'  => 'datetime',
                 'format' => 'yyyy-MM-dd',
                 'attr' => array('class' => 'date'),
                 'required' => false))
             ->add('queryType', ChoiceType::class, [
-                'label' => 'Show books with > 2 authors(don\'t use other filters)',
+                'label' => 'Show books with > 2 authors(don\'t use other filters) ',
                 'choices'  => [
                     'No' => 0,
                     'Yes, with native query' => 1,

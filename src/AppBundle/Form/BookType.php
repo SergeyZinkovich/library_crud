@@ -27,7 +27,7 @@ class BookType extends AbstractType
                 'required' => true,
             ])
             ->add('image', FileType::class, [
-                'label' => $options['image_required'] ? 'Image' : 'New Image',
+                'label' => $options['image_required'] ? 'Image ' : 'New Image ',
                 'data_class' => null,
                 'required' => $options['image_required'],
             ]);

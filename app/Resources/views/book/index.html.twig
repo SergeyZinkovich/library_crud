@@ -3,6 +3,7 @@
 {% block body %}
     <button type="button" onClick='location.href="/authors/"'>Authors</button>
     <button type="button" onClick='location.href="/books/"'>Books</button>
+    <br>
     {{ form_start(filter_form) }}
     {{ form_widget(filter_form) }}
     <input type="submit" value="Search" />
