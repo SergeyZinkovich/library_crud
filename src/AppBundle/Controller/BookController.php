@@ -33,14 +33,17 @@ class BookController extends Controller
         $books = $query->getResult();
 
         $editFormViews = [];
+        $deleteFormViews = [];
         foreach ($books as $book){
             $editFormViews[] = $this->createEditForm($book)->createView();
+            $deleteFormViews[] = $this->createDeleteForm($book)->createView();
         }
 
         return $this->render('book/index.html.twig', array(
             'books' => $books,
             'filter_form' => $filterForm->createView(),
             'edit_forms' => $editFormViews,
+            'delete_forms' => $deleteFormViews,
         ));
     }
 
@@ -145,6 +148,10 @@ class BookController extends Controller
             $em->flush();
         }
 
+        if ($request->isXmlHttpRequest()) {
+            return new Response('', 200);
+        }
+
         return $this->redirectToRoute('books_index');
     }
 
@@ -157,7 +164,8 @@ class BookController extends Controller
      */
     private function createDeleteForm(Book $book)
     {
-        return $this->createFormBuilder()
+        return $this->get('form.factory')
+        ->createNamedBuilder('delete_book' . $book->getId())
             ->setAction($this->generateUrl('books_delete', array('id' => $book->getId())))
             ->setMethod('DELETE')
             ->getForm()

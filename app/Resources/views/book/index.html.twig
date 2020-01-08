@@ -23,6 +23,24 @@
                 });
             }
             $(function() {
+                $("form[name^='delete_book']").submit(function (e) {
+                    e.preventDefault();
+                    var form = $(this);
+                    $.ajax({
+                        type: 'POST',
+                        url: form.attr('action'),
+                        data: form.serializeArray(),
+                        success: function () {
+                            var id = form.attr('book_id');
+                            $("[book_id='" + id +"']").remove();
+                        },
+                        error: function () {
+                            console.log("Updating failed");
+                        }
+                    });
+                });
+            });
+            $(function() {
                 $("form[name^='book'][name!='book_filter']").submit(function(e) {
                     e.preventDefault();
                     var form = $(this);
@@ -65,7 +83,7 @@
         </thead>
         <tbody>
         {% for form in edit_forms %}
-            <tr>
+            <tr book_id = '{{ form.vars.value.id }}'>
                 {{ form_start(form, {'attr': {'book_id': form.vars.value.id}}) }}
                 <td><a href="{{ path('books_show', { 'id': form.vars.value.id }) }}">{{ form.vars.value.id }}</a></td>
                 <td>
@@ -99,10 +117,13 @@
                 <td>
                     <button type="button" onClick='location.href="{{ path('books_show', { 'id': form.vars.value.id }) }}"'>Show</button>
                     <br>
-                    <button name = 'book{{ form.vars.value.id }}_edit_btn' type="button" onclick="change_field('{{ form.vars.value.id }}');">Edit</button>
                     <input name = 'book{{ form.vars.value.id }}_submit_btn' hidden='hidden' type="submit" value="Submit"/>
+                    <button name = 'book{{ form.vars.value.id }}_edit_btn' type="button" onclick="change_field('{{ form.vars.value.id }}');">Edit</button>
+                    {{ form_end(form) }}
+                    {{ form_start(delete_forms[loop.index - 1], {'attr': {'book_id': form.vars.value.id}}) }}
+                        <input type="submit" value="Delete">
+                    {{ form_end(delete_forms[loop.index - 1]) }}
                 </td>
-                {{ form_end(form) }}
             </tr>
         {% endfor %}
         </tbody>
