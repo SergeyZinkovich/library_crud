@@ -6,6 +6,7 @@ namespace AppBundle\Form;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -34,7 +35,15 @@ class BookFilterType extends AbstractType
                 'input'  => 'datetime',
                 'format' => 'yyyy-MM-dd',
                 'attr' => array('class' => 'date'),
-                'required' => false));
+                'required' => false))
+            ->add('queryType', ChoiceType::class, [
+                'label' => 'Show books with > 2 authors(don\'t use other filters)',
+                'choices'  => [
+                    'No' => 0,
+                    'Yes, with native query' => 1,
+                    'Yes, with dql query' => 2,
+                ],
+            ]);
     }
 
     public function getDefaultOptions(array $options)

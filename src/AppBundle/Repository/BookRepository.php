@@ -15,6 +15,12 @@ class BookRepository extends \Doctrine\ORM\EntityRepository
 {
     public function getBooksWithFilter($bookFilter)
     {
+        if ($bookFilter->queryType == 1){
+            return $this->getBooksWithMoreThenTwoAuthorsNative();
+        }
+        elseif ($bookFilter->queryType == 2){
+            return $this->getBooksWithMoreThenTwoAuthorsDql();
+        }
         $query = $this->createQueryBuilder('book')
             ->innerJoin(
                 'book.authors',
@@ -49,7 +55,7 @@ class BookRepository extends \Doctrine\ORM\EntityRepository
         return $query->getQuery();
     }
 
-    public function getBooksWithTwoAuthorsNative()
+    public function getBooksWithMoreThenTwoAuthorsNative()
     {
         $sql = 'Select T.book_id, title, description, publicationDate, image, name, author_id from
          (SELECT book_id, count(*) c
@@ -59,7 +65,7 @@ class BookRepository extends \Doctrine\ORM\EntityRepository
          INNER JOIN book_author ba on ba.book_id = T.book_id
          INNER JOIN book b on T.book_id = b.id
          INNER JOIN author authors on author_id = authors.id
-         where c = 2';
+         where c > 2';
         $rsm = new ResultSetMapping();
         $rsm->addEntityResult('AppBundle:Book', 'book')
         ->addFieldResult('book', 'book_id', 'id')
@@ -73,14 +79,14 @@ class BookRepository extends \Doctrine\ORM\EntityRepository
         return $this->_em->createNativeQuery($sql, $rsm);
     }
 
-    public function getBooksWithTwoAuthorsDql()
+    public function getBooksWithMoreThenTwoAuthorsDql()
     {
         $query = new QueryBuilder($this->_em);
         $query->select('book')
             ->from('AppBundle\Entity\Book', 'book')
             ->innerJoin('book.authors', 'authors')
             ->addGroupBy('book.id')
-            ->having('COUNT(authors) = 2');
+            ->having('COUNT(authors) > 2');
         return $query->getQuery();
     }
 }

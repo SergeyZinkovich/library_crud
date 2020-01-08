@@ -33,4 +33,9 @@ class BookFilter
      * @Assert\DateTime
      */
     public $dateTo;
+
+    /**
+     * @var integer
+     */
+    public $queryType;
 }
